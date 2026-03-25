@@ -1,4 +1,4 @@
-package io.github.drag0n1zed.drandomspawn;
+package dev.zerodrag.drandomspawn;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -15,6 +15,8 @@ public class RandomSpawnConfig {
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> biomeBlacklist;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> blockBlacklist;
     public static ForgeConfigSpec.BooleanValue useSpectatorLock;
+    public static ForgeConfigSpec.BooleanValue ignoreRespawnPoint;
+    public static ForgeConfigSpec.BooleanValue alwaysRandomSpawn;
 
     static {
         CONFIG_BUILDER.push("dRandomSpawn Config");
@@ -76,12 +78,31 @@ public class RandomSpawnConfig {
                         "useSpectatorLock = true"
                 )
                 .define("useSpectatorLock", true);
+
+        ignoreRespawnPoint = CONFIG_BUILDER
+                .comment(
+                        "If true, the mod ignores player respawn points such as beds, respawn anchors,",
+                        "and /spawnpoint when deciding whether to handle a respawn.",
+                        "If false, the mod only handles respawns when the player has no respawn point set.",
+                        "Default:",
+                        "ignoreRespawnPoint = false"
+                )
+                .define("ignoreRespawnPoint", false);
+
+        alwaysRandomSpawn = CONFIG_BUILDER
+                .comment(
+                        "If true, every respawn handled by this mod will teleport the player to a new random location.",
+                        "If false, handled respawns return the player to their previously saved random spawn point.",
+                        "Default:",
+                        "alwaysRandomSpawn = false"
+                )
+                .define("alwaysRandomSpawn", false);
         CONFIG_BUILDER.pop();
         CONFIG_SPEC = CONFIG_BUILDER.build();
     }
 
-    public static void register() {
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, CONFIG_SPEC, "dRandomSpawn.toml");
+    public static void register(ModLoadingContext context) {
+        context.registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, CONFIG_SPEC, "dRandomSpawn.toml");
     }
 
 }

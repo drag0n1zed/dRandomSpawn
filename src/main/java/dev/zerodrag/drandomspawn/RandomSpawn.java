@@ -1,7 +1,7 @@
-package io.github.drag0n1zed.drandomspawn;
+package dev.zerodrag.drandomspawn;
 
 import com.mojang.logging.LogUtils;
-import io.github.drag0n1zed.drandomspawn.command.ModCommands;
+import dev.zerodrag.drandomspawn.command.ModCommands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -19,6 +19,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.world.effect.MobEffects;
 import org.slf4j.Logger;
@@ -51,8 +52,8 @@ public class RandomSpawn {
         RESPAWN_EXISTING_SPAWN
     }
 
-    public RandomSpawn() {
-        RandomSpawnConfig.register();
+    public RandomSpawn(FMLJavaModLoadingContext context) {
+        RandomSpawnConfig.register(context);
     }
 
     // --- Event Handlers ---
@@ -119,17 +120,18 @@ public class RandomSpawn {
             return;
         }
 
-        // Checks if the player respawned without a specific respawn position (bed/anchor).
-        if (player.getRespawnPosition() == null) {
-            CompoundTag playerPersistedData = player.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
+        boolean shouldIgnoreRespawnPoint = RandomSpawnConfig.ignoreRespawnPoint.get();
+        if (!shouldIgnoreRespawnPoint && player.getRespawnPosition() != null) {
+            return;
+        }
 
-            // If the player has a custom spawn point from this mod, use that.
-            if (playerPersistedData.contains(NBT_KEY_SPAWN_X)) {
-                initiatePlayerSpawn(player, SpawnReason.RESPAWN_EXISTING_SPAWN);
-            } else {
-                // Player has no bed/anchor AND no custom spawn point from this mod. Searches for a new one.
-                initiatePlayerSpawn(player, SpawnReason.RESPAWN_NEW_SPAWN);
-            }
+        CompoundTag playerPersistedData = player.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
+        boolean hasExistingSpawn = playerPersistedData.contains(NBT_KEY_SPAWN_X);
+
+        if (hasExistingSpawn && !RandomSpawnConfig.alwaysRandomSpawn.get()) {
+            initiatePlayerSpawn(player, SpawnReason.RESPAWN_EXISTING_SPAWN);
+        } else {
+            initiatePlayerSpawn(player, SpawnReason.RESPAWN_NEW_SPAWN);
         }
     }
 
@@ -141,7 +143,7 @@ public class RandomSpawn {
      * The success/fail actions are run safely on the main server thread.
      * This method also handles changing the player's gamemode to spectator,
      * gives the player a darkness effect, and eventually revert back
-     * if ModConfig.useSpectatorLock is enabled.
+     * if RandomSpawnConfig.useSpectatorLock is enabled.
      *
      * @param player    The player to teleport.
      * @param onSuccess A Consumer to run on success, accepting the found BlockPos.
@@ -237,7 +239,7 @@ public class RandomSpawn {
     // --- Private Helper Methods ---
 
     /**
-     * Handles the logic for a player's initial spawn or respawn when no bed/anchor is set.
+     * Handles the logic for a player's initial spawn or any respawn managed by this mod.
      * This method decides whether to use an existing custom spawn or search for a new one.
      *
      * @param player The ServerPlayer.

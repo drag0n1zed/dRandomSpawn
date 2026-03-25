@@ -4,9 +4,11 @@ A simple mod that teleports new players to a random location and sets it as thei
 
 ## Features
 
-*   **Asynchronous Random Spawn:** Players (first-join or respawning without a set bed/spawnpoint) are teleported to a unique, safe random location. The search is asynchronous.
-*   **Spectator Lock (Configurable):** Optionally places players in spectator mode and gives darkness effect during the spawn search.
-*   **Intelligent Respawn Handling:** Respects player-set beds, respawn anchors, and `/spawnpoint` commands. Only utilizes the unique spawn if no other respawn point is defined.
+*   **Asynchronous Random Spawn:** New players are teleported to a unique, safe random location without blocking the server thread.
+*   **Flexible Bedless Respawns:** By default, bedless respawns return players to their saved random spawn. Enable `alwaysRandomSpawn` to roll a fresh random location for any respawn the mod handles.
+*   **Optional Respawn-Point Override:** Enable `ignoreRespawnPoint` to bypass beds, respawn anchors, and `/spawnpoint`, making the mod handle every respawn instead of only bedless ones.
+*   **Spectator Lock (Configurable):** Optionally places players in spectator mode and gives darkness during any random spawn search so world loading stays hidden.
+*   **Intelligent Respawn Handling:** By default, player-set beds, respawn anchors, and `/spawnpoint` commands are respected until `ignoreRespawnPoint` is enabled.
 *   **Customizable Spawn Conditions:**
     *   **Search Radius:** Define the maximum distance for random teleportation.
     *   **Biome Blacklist:** Exclude specific biomes from potential spawn locations.
@@ -18,29 +20,24 @@ A simple mod that teleports new players to a random location and sets it as thei
 
 ## Configuration
 
-The `dRandomSpawn.toml` file, located in your `config` folder, allows for customization:
+Edit `dRandomSpawn.toml` located under `/config`:
 
-*   `maxDistance`: The maximum radius, in blocks, from the world spawn for random teleportation. Higher values may slightly increase search time.
+*   `maxDistance`: The maximum radius, in blocks, from the world spawn for random teleportation.
 *   `minDistance`: The minimum radius, in blocks, from the world spawn for random teleportation.
 *   `maxTries`: How many times the mod will try to find a safe location within the maxDistance. If all attempts fail, the player will spawn at the default world spawn.
-*   `useSpectatorLock`: If true, puts a player into spectator mode on first join while finding a safe spawn. This prevents them from moving and hides world loading, providing a smoother experience.
+*   `useSpectatorLock`: If true, puts a player into spectator mode while any random spawn search is running. This prevents movement and hides world loading for a smoother experience.
+*   `ignoreRespawnPoint`: If true, beds, respawn anchors, and `/spawnpoint` are ignored, so the mod handles every respawn. If false, the mod only handles respawns when no respawn point is set.
+*   `alwaysRandomSpawn`: If true, every respawn handled by the mod finds a fresh random spawn. If false, handled respawns reuse the player's saved random spawn point.
 *   `biomeBlacklist`: A list of biomes where new players are not allowed to spawn. Entries must be valid biome resource locations, e.g., 'minecraft:ocean' or 'biomesoplenty:wasteland'.
 *   `blockBlacklist`: A list of blocks that players cannot spawn directly on top of. This is useful for preventing spawns on dangerous blocks. Entries must be valid block resource locations, e.g., 'minecraft:lava'.
 
-## Author
+Respawn behavior combinations:
 
-*   **drag0n1zed** ([GitHub](https://github.com/drag0n1zed))
+*   `ignoreRespawnPoint = false`, `alwaysRandomSpawn = false`: Respect player respawn points; otherwise reuse the saved random spawn.
+*   `ignoreRespawnPoint = false`, `alwaysRandomSpawn = true`: Respect player respawn points; otherwise choose a fresh random spawn each time.
+*   `ignoreRespawnPoint = true`, `alwaysRandomSpawn = false`: Ignore player respawn points and always return to the saved random spawn.
+*   `ignoreRespawnPoint = true`, `alwaysRandomSpawn = true`: Ignore player respawn points and choose a fresh random spawn on every respawn.
 
 ## Credits
 
-This project is a heavily revamped fork of the original [RandomSpawn](https://github.com/rinko1231/RandomSpawn) project by rinko1231.
-
-## Licensing
-
-This mod is licensed under the **GNU Lesser General Public License v3.0 (LGPL-3.0)**. A full copy of the license is available in the `LICENSE` file.
-
-### Attribution & Original License
-
-As this project was originally forked from `rinko1231/RandomSpawn`, it incorporates some of its code, which has since been significantly modified.
-
-In compliance with the original MIT License, its license text and copyright notice are preserved in the `LICENSE.original.md` file. All new contributions and the project as a whole are now covered by the LGPL-3.0 license.
+This project is a heavily revamped fork of the original [RandomSpawn](https://github.com/rinko1231/RandomSpawn) project by rinko1231, released under MIT; the original license is available under `LICENSE.original.md`.

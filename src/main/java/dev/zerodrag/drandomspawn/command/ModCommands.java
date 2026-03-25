@@ -1,9 +1,9 @@
-package io.github.drag0n1zed.drandomspawn.command;
+package dev.zerodrag.drandomspawn.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import io.github.drag0n1zed.drandomspawn.RandomSpawn;
+import dev.zerodrag.drandomspawn.RandomSpawn;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
